@@ -590,8 +590,8 @@
     </div>
 
     <script>
-        // Конфігурація - змінено на локальний сервер
-        const ADMIN_PANEL_URL = window.location.origin + '/maintenance';
+        // Конфігурація - використовуємо правильний URL з Replit
+        const ADMIN_PANEL_URL = 'https://48feeb2f-c087-4ff9-948e-2a173b8c86a6-00-2a9iwcrmr9wm6.spock.replit.dev/maintenance';
         
         // Глобальні змінні
         let maintenanceMode = false;
@@ -639,6 +639,8 @@
                             updateMaintenanceUI();
                             console.log(`Статус технічної перерви змінився: ${maintenanceMode ? 'УВІМКНЕНО' : 'ВИМКНЕНО'}`);
                         }
+                    } else {
+                        console.log('Помилка відповіді сервера:', response.status);
                     }
                 } catch (error) {
                     console.log('Помилка отримання статусу:', error);
@@ -687,6 +689,7 @@
                 checkInterval = setInterval(checkMaintenanceStatus, 1000);
                 
                 console.log('Запущено перевірку статусу технічної перерви (1 секунда)');
+                console.log('URL для перевірки:', ADMIN_PANEL_URL);
             }
 
             // Зупинка перевірки статусу
@@ -901,7 +904,9 @@
             // Відтворити трек
             function playTrack() {
                 if (tracks.length === 0 || maintenanceMode) {
-                    alert('❌ Відтворення недоступне під час технічної перерви');
+                    if (maintenanceMode) {
+                        alert('❌ Відтворення недоступне під час технічної перерви');
+                    }
                     return;
                 }
                 
