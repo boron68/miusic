@@ -610,17 +610,16 @@
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        // Додаємо timestamp для уникнення кешування
                         cache: 'no-cache'
                     });
 
                     if (response.ok) {
                         const data = await response.json();
                         
-                        // Очікуємо, що сервер повертає { maintenance: true/false }
                         if (data.maintenance !== maintenanceMode) {
                             maintenanceMode = data.maintenance;
                             updateMaintenanceUI();
+                            console.log(`Статус технічної перерви змінився: ${maintenanceMode ? 'УВІМКНЕНО' : 'ВИМКНЕНО'}`);
                         }
                     }
                 } catch (error) {
@@ -656,14 +655,17 @@
                 // Перевіряємо одразу при завантаженні
                 checkMaintenanceStatus();
                 
-                // Встановлюємо інтервал перевірки кожні 10 секунд
-                checkInterval = setInterval(checkMaintenanceStatus, 10000);
+                // Встановлюємо інтервал перевірки кожну секунду (1000 мс)
+                checkInterval = setInterval(checkMaintenanceStatus, 1000);
+                
+                console.log('Запущено перевірку статусу технічної перерви (1 секунда)');
             }
 
             // Зупинка перевірки статусу
             function stopStatusChecking() {
                 if (checkInterval) {
                     clearInterval(checkInterval);
+                    console.log('Зупинено перевірку статусу технічної перерви');
                 }
             }
 
@@ -691,7 +693,7 @@
             
             // Збереження стану плеєра в cookies
             function savePlayerState() {
-                if (maintenanceMode) return; // Не зберігаємо стан під час технічної перерви
+                if (maintenanceMode) return;
                 
                 const state = {
                     currentTrackIndex: currentTrackIndex,
