@@ -266,6 +266,16 @@
             display: none;
         }
         
+        .reload-notification {
+            background: var(--warning);
+            color: var(--dark);
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
         .player-section {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
@@ -647,6 +657,9 @@
             <p>Оберіть аудіофайли з вашого пристрою</p>
             <input type="file" id="fileInput" accept="audio/*" multiple>
             <label for="fileInput" class="upload-btn">Обрати файли</label>
+            <div class="reload-notification" id="reloadNotification">
+                ⚠️ Після перезавантаження потрібно знову обрати файли для відтворення
+            </div>
             <img src="gold_coin.png" class="upload-decoration" alt="Прикраса секції завантаження">
         </section>
         
@@ -717,12 +730,24 @@
             const maintenanceOverlay = document.getElementById('maintenanceOverlay');
             const statusIndicator = document.getElementById('statusIndicator');
             const countdownElement = document.getElementById('countdown');
+            const reloadNotification = document.getElementById('reloadNotification');
             
             // Аудіо контекст
             const audio = new Audio();
             let isPlaying = false;
             let currentTrackIndex = 0;
             let tracks = [];
+
+            // Перевіряємо чи є збережені треки
+            function hasSavedTracks() {
+                const savedState = getCookie('musicPlayerState');
+                return savedState && JSON.parse(savedState).tracks && JSON.parse(savedState).tracks.length > 0;
+            }
+
+            // Показуємо сповіщення про необхідність перезавантаження файлів
+            if (hasSavedTracks()) {
+                reloadNotification.style.display = 'block';
+            }
 
             // Таймер для відліку
             function updateCountdown() {
@@ -866,33 +891,24 @@
                         currentTrackIndex = state.currentTrackIndex || 0;
                         
                         if (state.tracks && state.tracks.length > 0) {
-                            tracks = state.tracks;
+                            // Відображаємо плейлист з назвами треків
+                            tracks = state.tracks.map(trackData => ({
+                                title: trackData.title,
+                                artist: trackData.artist,
+                                duration: trackData.duration,
+                                src: null // blob URLs не зберігаються
+                            }));
+                            
                             renderPlaylist();
                             
                             if (tracks.length > 0) {
                                 updateActiveTrack();
-                                trackTitle.textContent = tracks[currentTrackIndex].title;
+                                trackTitle.textContent = tracks[currentTrackIndex].title + " (потрібно перезавантажити)";
                                 trackArtist.textContent = tracks[currentTrackIndex].artist;
                                 totalTimeEl.textContent = tracks[currentTrackIndex].duration;
                                 
-                                // ВІДНОВЛЕННЯ ВІДТВОРЕННЯ - ФІКС
-                                if (state.isPlaying) {
-                                    // Створюємо новий blob URL для відтворення
-                                    const track = tracks[currentTrackIndex];
-                                    if (track.file) {
-                                        const url = URL.createObjectURL(track.file);
-                                        track.src = url;
-                                        loadTrack(currentTrackIndex);
-                                        // Запускаємо відтворення через невелику затримку
-                                        setTimeout(() => {
-                                            playTrack();
-                                            // Встановлюємо поточний час
-                                            if (state.currentTime) {
-                                                audio.currentTime = state.currentTime;
-                                            }
-                                        }, 500);
-                                    }
-                                }
+                                // Показуємо сповіщення
+                                reloadNotification.style.display = 'block';
                             }
                         }
                     } catch (e) {
@@ -911,8 +927,14 @@
                 const files = e.target.files;
                 if (files.length === 0) return;
                 
+                // Ховаємо сповіщення про перезавантаження
+                reloadNotification.style.display = 'none';
+                
                 const emptyMsg = document.querySelector('.empty-playlist');
                 if (emptyMsg) emptyMsg.remove();
+                
+                // Очищаємо попередні треки
+                tracks = [];
                 
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
@@ -923,7 +945,7 @@
                         artist: 'Невідомий виконавець',
                         src: url,
                         duration: '--:--',
-                        file: file // Зберігаємо файл для відновлення
+                        file: file
                     };
                     
                     tracks.push(track);
@@ -1007,6 +1029,13 @@
                             return;
                         }
                         
+                        // Якщо трек не завантажений (після перезавантаження)
+                        if (!track.src) {
+                            alert('⚠️ Цей трек потребує перезавантаження. Будь ласка, оберіть файли знову.');
+                            fileInput.click();
+                            return;
+                        }
+                        
                         document.querySelectorAll('.playlist-item').forEach(item => {
                             item.classList.remove('active');
                         });
@@ -1037,6 +1066,9 @@
                     currentTimeEl.textContent = '0:00';
                     
                     savePlayerState();
+                } else {
+                    trackTitle.textContent = track.title + " (потрібно перезавантажити)";
+                    trackArtist.textContent = track.artist;
                 }
             }
             
@@ -1046,6 +1078,13 @@
                     if (maintenanceMode) {
                         alert('❌ Відтворення недоступне під час технічної перерви');
                     }
+                    return;
+                }
+                
+                const currentTrack = tracks[currentTrackIndex];
+                if (!currentTrack.src) {
+                    alert('⚠️ Трек потребує перезавантаження. Будь ласка, оберіть файли знову.');
+                    fileInput.click();
                     return;
                 }
                 
@@ -1157,6 +1196,7 @@
                     progressBar.style.width = '0%';
                     pauseTrack();
                     renderPlaylist();
+                    reloadNotification.style.display = 'none';
                     
                     deleteCookie('musicPlayerState');
                 }
@@ -1167,6 +1207,8 @@
                 if (tracks.length === 0 || maintenanceMode) {
                     if (maintenanceMode) {
                         alert('❌ Відтворення недоступне під час технічної перерви');
+                    } else {
+                        alert('⚠️ Спочатку додайте треки до плейлиста');
                     }
                     return;
                 }
