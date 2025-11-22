@@ -35,18 +35,18 @@
             overflow-x: hidden;
         }
         
-        /* Стилі для технічної перерви */
+        /* Стилі для технічної перерви на весь екран */
         .maintenance-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: linear-gradient(135deg, #2d3436, #1a1a2e);
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 10000;
             flex-direction: column;
             text-align: center;
         }
@@ -56,30 +56,53 @@
         }
         
         .maintenance-content {
-            background: var(--dark);
-            padding: 3rem;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 4rem;
             border-radius: 20px;
-            border: 2px solid var(--warning);
-            max-width: 500px;
-            box-shadow: 0 0 50px rgba(253, 203, 110, 0.3);
+            border: 3px solid var(--warning);
+            max-width: 90%;
+            width: 600px;
+            box-shadow: 0 0 80px rgba(253, 203, 110, 0.4);
+            backdrop-filter: blur(10px);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 80px rgba(253, 203, 110, 0.4); }
+            50% { box-shadow: 0 0 100px rgba(253, 203, 110, 0.6); }
+            100% { box-shadow: 0 0 80px rgba(253, 203, 110, 0.4); }
         }
         
         .maintenance-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
+            font-size: 6rem;
+            margin-bottom: 2rem;
             color: var(--warning);
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
         
         .maintenance-title {
-            font-size: 2rem;
+            font-size: 3rem;
             color: var(--warning);
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 20px rgba(253, 203, 110, 0.5);
         }
         
         .maintenance-message {
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             color: var(--light);
-            line-height: 1.6;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+        
+        .maintenance-timer {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            margin-top: 1rem;
         }
         
         .status-indicator {
@@ -90,7 +113,7 @@
             border-radius: 20px;
             font-size: 0.9rem;
             font-weight: bold;
-            z-index: 1001;
+            z-index: 10001;
             transition: all 0.3s ease;
         }
         
@@ -105,20 +128,12 @@
         }
         
         /* Блокування інтерактивних елементів під час технічної перерви */
-        .maintenance-active .container * {
-            pointer-events: none !important;
+        .maintenance-active .container {
+            display: none !important;
         }
         
-        .maintenance-active .upload-btn,
-        .maintenance-active .control-btn,
-        .maintenance-active .clear-btn,
-        .maintenance-active .playlist-item {
-            opacity: 0.5;
-            cursor: not-allowed !important;
-        }
-        
-        .maintenance-active .progress-container {
-            cursor: not-allowed !important;
+        .maintenance-active .status-indicator {
+            display: block !important;
         }
         
         /* Декоративні елементи */
@@ -171,12 +186,6 @@
             gap: 2rem;
             position: relative;
             z-index: 1;
-            transition: all 0.3s ease;
-        }
-        
-        .maintenance-active .container {
-            filter: blur(3px);
-            opacity: 0.7;
         }
         
         header {
@@ -501,6 +510,23 @@
                 font-size: 1.7rem;
             }
             
+            .maintenance-content {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .maintenance-title {
+                font-size: 2rem;
+            }
+            
+            .maintenance-message {
+                font-size: 1.1rem;
+            }
+            
+            .maintenance-icon {
+                font-size: 4rem;
+            }
+            
             .decoration-5, .decoration-6, .decoration-7, .decoration-8 {
                 display: none;
             }
@@ -513,16 +539,20 @@
         🟢 Онлайн
     </div>
 
-    <!-- Технічна перерва -->
+    <!-- Технічна перерва на весь екран -->
     <div class="maintenance-overlay" id="maintenanceOverlay">
         <div class="maintenance-content">
             <div class="maintenance-icon">🔧</div>
-            <h2 class="maintenance-title">Технічна перерва</h2>
+            <h1 class="maintenance-title">ТЕХНІЧНА ПЕРЕРВА</h1>
             <p class="maintenance-message">
-                Наразі тривають технічні роботи. <br>
-                Музичний плеєр тимчасово недоступний. <br>
+                Наразі тривають технічні роботи.<br>
+                Музичний плеєр тимчасово недоступний.<br>
+                Ми працюємо над усуненням проблеми.<br>
                 Будь ласка, зачекайте...
             </p>
+            <div class="maintenance-timer" id="maintenanceTimer">
+                Оновлення статусу через: <span id="countdown">1</span> сек
+            </div>
         </div>
     </div>
 
@@ -596,6 +626,7 @@
         // Глобальні змінні
         let maintenanceMode = false;
         let checkInterval;
+        let countdown = 1;
 
         document.addEventListener('DOMContentLoaded', function() {
             // Елементи DOM
@@ -613,12 +644,24 @@
             const clearBtn = document.querySelector('.clear-btn');
             const maintenanceOverlay = document.getElementById('maintenanceOverlay');
             const statusIndicator = document.getElementById('statusIndicator');
+            const countdownElement = document.getElementById('countdown');
             
             // Аудіо контекст
             const audio = new Audio();
             let isPlaying = false;
             let currentTrackIndex = 0;
             let tracks = [];
+
+            // Таймер для відліку
+            function updateCountdown() {
+                countdown--;
+                if (countdown <= 0) {
+                    countdown = 1;
+                }
+                if (countdownElement) {
+                    countdownElement.textContent = countdown;
+                }
+            }
 
             // Функція для перевірки статусу технічної перерви
             async function checkMaintenanceStatus() {
@@ -686,7 +729,10 @@
                 checkMaintenanceStatus();
                 
                 // Встановлюємо інтервал перевірки кожну секунду (1000 мс)
-                checkInterval = setInterval(checkMaintenanceStatus, 1000);
+                checkInterval = setInterval(() => {
+                    checkMaintenanceStatus();
+                    updateCountdown();
+                }, 1000);
                 
                 console.log('Запущено перевірку статусу технічної перерви (1 секунда)');
                 console.log('URL для перевірки:', ADMIN_PANEL_URL);
