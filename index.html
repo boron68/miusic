@@ -104,6 +104,23 @@
             color: var(--dark);
         }
         
+        /* Блокування інтерактивних елементів під час технічної перерви */
+        .maintenance-active .container * {
+            pointer-events: none !important;
+        }
+        
+        .maintenance-active .upload-btn,
+        .maintenance-active .control-btn,
+        .maintenance-active .clear-btn,
+        .maintenance-active .playlist-item {
+            opacity: 0.5;
+            cursor: not-allowed !important;
+        }
+        
+        .maintenance-active .progress-container {
+            cursor: not-allowed !important;
+        }
+        
         /* Декоративні елементи */
         .decoration {
             position: absolute;
@@ -154,11 +171,12 @@
             gap: 2rem;
             position: relative;
             z-index: 1;
-            transition: filter 0.3s ease;
+            transition: all 0.3s ease;
         }
         
         .maintenance-active .container {
-            filter: blur(5px);
+            filter: blur(3px);
+            opacity: 0.7;
         }
         
         header {
@@ -572,8 +590,8 @@
     </div>
 
     <script>
-        // Конфігурація
-        const ADMIN_PANEL_URL = 'https://48feeb2f-c087-4ff9-948e-2a173b8c86a6-00-2a9iwcrmr9wm6.spock.replit.dev/';
+        // Конфігурація - змінено на локальний сервер
+        const ADMIN_PANEL_URL = window.location.origin + '/maintenance';
         
         // Глобальні змінні
         let maintenanceMode = false;
@@ -635,18 +653,28 @@
             // Оновлення UI при зміні статусу технічної перерви
             function updateMaintenanceUI() {
                 if (maintenanceMode) {
+                    // Увімкнути технічну перерву
                     document.body.classList.add('maintenance-active');
                     statusIndicator.textContent = '🟡 Технічні роботи';
                     statusIndicator.className = 'status-indicator status-maintenance';
                     
-                    // Зупиняємо музику при ввімкненні технічної перерви
+                    // Зупиняємо музику
                     if (isPlaying) {
                         pauseTrack();
                     }
+                    
+                    // Блокуємо аудіо
+                    audio.pause();
+                    audio.src = '';
+                    
+                    console.log('🔧 Технічна перерва активована - плеєр заблоковано');
                 } else {
+                    // Вимкнути технічну перерву
                     document.body.classList.remove('maintenance-active');
                     statusIndicator.textContent = '🟢 Онлайн';
                     statusIndicator.className = 'status-indicator status-online';
+                    
+                    console.log('✅ Технічна перерва вимкнена - плеєр доступний');
                 }
             }
 
@@ -736,7 +764,7 @@
             // Обробник завантаження файлів
             fileInput.addEventListener('change', function(e) {
                 if (maintenanceMode) {
-                    alert('Завантаження недоступне під час технічної перерви');
+                    alert('❌ Завантаження недоступне під час технічної перерви');
                     return;
                 }
                 
@@ -772,7 +800,10 @@
                     `;
                     
                     li.addEventListener('click', () => {
-                        if (maintenanceMode) return;
+                        if (maintenanceMode) {
+                            alert('❌ Відтворення недоступне під час технічної перерви');
+                            return;
+                        }
                         
                         document.querySelectorAll('.playlist-item').forEach(item => {
                             item.classList.remove('active');
@@ -831,7 +862,10 @@
                     `;
                     
                     li.addEventListener('click', () => {
-                        if (maintenanceMode) return;
+                        if (maintenanceMode) {
+                            alert('❌ Відтворення недоступне під час технічної перерви');
+                            return;
+                        }
                         
                         document.querySelectorAll('.playlist-item').forEach(item => {
                             item.classList.remove('active');
@@ -866,7 +900,10 @@
             
             // Відтворити трек
             function playTrack() {
-                if (tracks.length === 0 || maintenanceMode) return;
+                if (tracks.length === 0 || maintenanceMode) {
+                    alert('❌ Відтворення недоступне під час технічної перерви');
+                    return;
+                }
                 
                 audio.play();
                 isPlaying = true;
@@ -953,7 +990,7 @@
             // Очистити плейлист
             function clearPlaylist() {
                 if (maintenanceMode) {
-                    alert('Очищення недоступне під час технічної перерви');
+                    alert('❌ Очищення недоступне під час технічної перерви');
                     return;
                 }
                 
@@ -975,7 +1012,12 @@
             
             // Обробники подій
             playBtn.addEventListener('click', () => {
-                if (tracks.length === 0 || maintenanceMode) return;
+                if (tracks.length === 0 || maintenanceMode) {
+                    if (maintenanceMode) {
+                        alert('❌ Відтворення недоступне під час технічної перерви');
+                    }
+                    return;
+                }
                 
                 if (isPlaying) {
                     pauseTrack();
