@@ -1,1 +1,547 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Стильний музичний плеєр</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --dark: #2d3436;
+            --light: #dfe6e9;
+            --success: #00b894;
+            --danger: #d63031;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--dark), #1a1a2e);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+        
+        .upload-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .upload-btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            margin-top: 1rem;
+            border: none;
+            font-size: 1rem;
+        }
+        
+        .upload-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .player-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .track-info {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .track-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .track-artist {
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .control-btn {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.1);
+        }
+        
+        .play-btn {
+            background: var(--primary);
+            font-size: 2rem;
+        }
+        
+        .play-btn:hover {
+            background: var(--secondary);
+        }
+        
+        .playlist-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .playlist-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+        
+        .playlist {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .playlist-item {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .playlist-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .playlist-item.active {
+            background: rgba(108, 92, 231, 0.2);
+            border-left: 3px solid var(--primary);
+        }
+        
+        .playlist-item-info {
+            flex: 1;
+        }
+        
+        .playlist-item-title {
+            font-weight: 600;
+        }
+        
+        .playlist-item-artist {
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+        
+        .playlist-item-duration {
+            color: var(--secondary);
+        }
+        
+        .empty-playlist {
+            text-align: center;
+            padding: 2rem;
+            color: var(--secondary);
+        }
+        
+        /* Стилі для скролбару */
+        .playlist::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .playlist::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        
+        .playlist::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+        
+        .playlist::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+        
+        /* Анімація обертання диска */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .rotating {
+            animation: rotate 10s linear infinite;
+        }
+        
+        .paused {
+            animation-play-state: paused;
+        }
+        
+        /* Адаптивність */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .upload-section, .player-section, .playlist-section {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                gap: 1rem;
+            }
+            
+            .control-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+            
+            .play-btn {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Музичний Плеєр</h1>
+            <p class="subtitle">Слухайте свою музику з будь-якого пристрою</p>
+        </header>
+        
+        <section class="upload-section">
+            <h2>Завантажте свою музику</h2>
+            <p>Оберіть аудіофайли з вашого пристрою</p>
+            <input type="file" id="fileInput" accept="audio/*" multiple>
+            <label for="fileInput" class="upload-btn">Обрати файли</label>
+        </section>
+        
+        <section class="player-section">
+            <div class="track-info">
+                <div class="track-title">Оберіть трек з плейлиста</div>
+                <div class="track-artist">---</div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar"></div>
+            </div>
+            
+            <div class="time-info">
+                <span class="current-time">0:00</span>
+                <span class="total-time">0:00</span>
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn prev-btn">⏮</button>
+                <button class="control-btn play-btn">▶</button>
+                <button class="control-btn next-btn">⏭</button>
+            </div>
+        </section>
+        
+        <section class="playlist-section">
+            <h3 class="playlist-title">Плейлист</h3>
+            <ul class="playlist">
+                <li class="empty-playlist">Плейлист порожній. Додайте треки!</li>
+            </ul>
+        </section>
+    </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Елементи DOM
+            const fileInput = document.getElementById('fileInput');
+            const playlist = document.querySelector('.playlist');
+            const trackTitle = document.querySelector('.track-title');
+            const trackArtist = document.querySelector('.track-artist');
+            const playBtn = document.querySelector('.play-btn');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            const progressBar = document.querySelector('.progress-bar');
+            const progressContainer = document.querySelector('.progress-container');
+            const currentTimeEl = document.querySelector('.current-time');
+            const totalTimeEl = document.querySelector('.total-time');
+            
+            // Аудіо контекст
+            const audio = new Audio();
+            let isPlaying = false;
+            let currentTrackIndex = 0;
+            let tracks = [];
+            
+            // Обробник завантаження файлів
+            fileInput.addEventListener('change', function(e) {
+                const files = e.target.files;
+                if (files.length === 0) return;
+                
+                // Очистити повідомлення про порожній плейлист
+                const emptyMsg = document.querySelector('.empty-playlist');
+                if (emptyMsg) emptyMsg.remove();
+                
+                // Додати файли до плейлиста
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const url = URL.createObjectURL(file);
+                    
+                    // Отримати метадані з файлу
+                    const track = {
+                        title: file.name.replace(/\.[^/.]+$/, ""), // Видалити розширення файлу
+                        artist: 'Невідомий виконавець',
+                        src: url,
+                        duration: '--:--'
+                    };
+                    
+                    // Додати до масиву треків
+                    tracks.push(track);
+                    
+                    // Створити елемент плейлиста
+                    const li = document.createElement('li');
+                    li.className = 'playlist-item';
+                    li.innerHTML = `
+                        <div class="playlist-item-info">
+                            <div class="playlist-item-title">${track.title}</div>
+                            <div class="playlist-item-artist">${track.artist}</div>
+                        </div>
+                        <div class="playlist-item-duration">${track.duration}</div>
+                    `;
+                    
+                    // Додати обробник кліку
+                    li.addEventListener('click', () => {
+                        // Видалити активний клас з усіх елементів
+                        document.querySelectorAll('.playlist-item').forEach(item => {
+                            item.classList.remove('active');
+                        });
+                        
+                        // Додати активний клас до поточного елемента
+                        li.classList.add('active');
+                        
+                        // Відтворити трек
+                        currentTrackIndex = tracks.indexOf(track);
+                        loadTrack(currentTrackIndex);
+                        playTrack();
+                    });
+                    
+                    // Додати до плейлиста
+                    playlist.appendChild(li);
+                    
+                    // Отримати тривалість треку
+                    const tempAudio = new Audio(url);
+                    tempAudio.addEventListener('loadedmetadata', function() {
+                        track.duration = formatTime(tempAudio.duration);
+                        li.querySelector('.playlist-item-duration').textContent = track.duration;
+                        
+                        // Якщо це перший трек, завантажити його
+                        if (tracks.length === 1) {
+                            li.classList.add('active');
+                            loadTrack(0);
+                        }
+                    });
+                }
+            });
+            
+            // Завантажити трек
+            function loadTrack(index) {
+                if (tracks.length === 0) return;
+                
+                const track = tracks[index];
+                audio.src = track.src;
+                trackTitle.textContent = track.title;
+                trackArtist.textContent = track.artist;
+                totalTimeEl.textContent = track.duration;
+                
+                // Скинути прогрес бар
+                progressBar.style.width = '0%';
+                currentTimeEl.textContent = '0:00';
+            }
+            
+            // Відтворити трек
+            function playTrack() {
+                if (tracks.length === 0) return;
+                
+                audio.play();
+                isPlaying = true;
+                playBtn.textContent = '⏸';
+            }
+            
+            // Поставити на паузу
+            function pauseTrack() {
+                audio.pause();
+                isPlaying = false;
+                playBtn.textContent = '▶';
+            }
+            
+            // Наступний трек
+            function nextTrack() {
+                if (tracks.length === 0) return;
+                
+                currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+                updateActiveTrack();
+                loadTrack(currentTrackIndex);
+                if (isPlaying) playTrack();
+            }
+            
+            // Попередній трек
+            function prevTrack() {
+                if (tracks.length === 0) return;
+                
+                currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+                updateActiveTrack();
+                loadTrack(currentTrackIndex);
+                if (isPlaying) playTrack();
+            }
+            
+            // Оновити активний трек у плейлисті
+            function updateActiveTrack() {
+                document.querySelectorAll('.playlist-item').forEach((item, index) => {
+                    if (index === currentTrackIndex) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Форматування часу
+            function formatTime(seconds) {
+                const min = Math.floor(seconds / 60);
+                const sec = Math.floor(seconds % 60);
+                return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+            }
+            
+            // Оновити прогрес бар
+            function updateProgress(e) {
+                const { duration, currentTime } = e.srcElement;
+                if (isNaN(duration)) return;
+                
+                const progressPercent = (currentTime / duration) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+                
+                currentTimeEl.textContent = formatTime(currentTime);
+            }
+            
+            // Встановити позицію відтворення
+            function setProgress(e) {
+                const width = this.clientWidth;
+                const clickX = e.offsetX;
+                const duration = audio.duration;
+                
+                audio.currentTime = (clickX / width) * duration;
+            }
+            
+            // Обробники подій
+            playBtn.addEventListener('click', () => {
+                if (tracks.length === 0) return;
+                
+                if (isPlaying) {
+                    pauseTrack();
+                } else {
+                    playTrack();
+                }
+            });
+            
+            nextBtn.addEventListener('click', nextTrack);
+            prevBtn.addEventListener('click', prevTrack);
+            
+            audio.addEventListener('timeupdate', updateProgress);
+            audio.addEventListener('ended', nextTrack);
+            
+            progressContainer.addEventListener('click', setProgress);
+        });
+    </script>
+</body>
+</html>
