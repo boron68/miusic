@@ -1,60 +1,130 @@
-// server.js
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Музичний Плеєр Brawl Stars</title>
+<style>
+body { background: #1a1a2e; color: #dfe6e9; font-family: Arial; margin: 0; padding: 20px; text-align: center; }
+h1 { font-size: 28px; margin-bottom: 20px; }
+button { padding: 12px 20px; margin: 8px; font-size: 16px; border-radius: 8px; border: none; cursor: pointer; }
+#enable { background: #dc2626; color: white; }
+#disable { background: #16a34a; color: white; }
+.track-info { margin: 15px 0; }
+.progress-container { width: 80%; height: 8px; background: rgba(255,255,255,0.1); margin: 15px auto; border-radius: 4px; cursor: pointer; position: relative; }
+.progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #6c5ce7, #a29bfe); border-radius: 4px; }
+.controls button { font-size: 18px; margin: 0 5px; }
+.playlist { list-style: none; padding: 0; max-height: 200px; overflow-y: auto; margin-top: 15px; }
+.playlist li { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
+.playlist li.active { background: rgba(108,92,231,0.2); }
+</style>
+</head>
+<body>
 
-const PORT = process.env.PORT || 3000;
+<h1>Музичний Плеєр</h1>
 
-const server = http.createServer((req, res) => {
+<!-- Адмін-кнопки техобслуговування -->
+<button id="enable" onclick="send('enable')">Увімкнути технічну перерву</button>
+<button id="disable" onclick="send('disable')">Вимкнути технічну перерву</button>
 
-  // Видаємо index.html
-  if (req.url === "/" || req.url === "/admin") {
-    const filePath = path.join(__dirname, "index.html");
+<div class="track-info">
+  <div id="track-title">Оберіть трек</div>
+  <div id="track-artist">---</div>
+</div>
 
-    fs.readFile(filePath, (err, data) => {
-      if (err) {
-        res.writeHead(500, { "Content-Type": "text/plain" });
-        return res.end("index.html не знайдено");
-      }
+<input type="file" id="fileInput" accept="audio/*" multiple>
+<button onclick="document.getElementById('fileInput').click()">Обрати файли</button>
 
-      res.writeHead(200, { "Content-Type": "text/html" });
-      return res.end(data);
-    });
-    return;
-  }
+<div class="progress-container" onclick="setProgress(event)">
+  <div class="progress-bar" id="progress"></div>
+</div>
+<div id="time">0:00 / 0:00</div>
 
-  // Приймаємо команди enable / disable
-  if (req.url === "/maintenance" && req.method === "POST") {
-    let body = "";
+<div class="controls">
+  <button onclick="prevTrack()">⏮</button>
+  <button id="playBtn" onclick="togglePlay()">▶</button>
+  <button onclick="nextTrack()">⏭</button>
+</div>
 
-    req.on("data", chunk => body += chunk);
-    req.on("end", () => {
-      try {
-        const json = JSON.parse(body);
+<ul class="playlist" id="playlist"></ul>
 
-        console.log("Команда:", json.action);
+<script>
+let audio = new Audio();
+let tracks = [];
+let currentTrack = 0;
+let isPlaying = false;
 
-        if (json.action === "enable") {
-          res.end("Технічне обслуговування увімкнено");
-        } else if (json.action === "disable") {
-          res.end("Технічне обслуговування вимкнено");
-        } else {
-          res.end("Невідома команда");
-        }
+const trackTitle = document.getElementById('track-title');
+const trackArtist = document.getElementById('track-artist');
+const playlistEl = document.getElementById('playlist');
+const progressBar = document.getElementById('progress');
+const timeEl = document.getElementById('time');
+const playBtn = document.getElementById('playBtn');
 
-      } catch (err) {
-        res.writeHead(400);
-        res.end("Невірний JSON");
-      }
-    });
-    return;
-  }
-
-  // Заглушка
-  res.writeHead(200, { "Content-Type": "text/plain" });
-  res.end("OK");
+document.getElementById('fileInput').addEventListener('change', (e)=>{
+    const files = e.target.files;
+    for(let file of files){
+        const url = URL.createObjectURL(file);
+        const track = {title: file.name.replace(/\.[^/.]+$/,""), artist:"Невідомий", src: url, duration: '--:--'};
+        tracks.push(track);
+        addPlaylistItem(track);
+    }
 });
 
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+function addPlaylistItem(track){
+    const li = document.createElement('li');
+    li.textContent = track.title + ' - ' + track.artist;
+    li.onclick = () => { currentTrack = tracks.indexOf(track); loadTrack(); playTrack(); };
+    playlistEl.appendChild(li);
+}
+
+function loadTrack(){
+    if(tracks.length === 0) return;
+    const t = tracks[currentTrack];
+    audio.src = t.src;
+    trackTitle.textContent = t.title;
+    trackArtist.textContent = t.artist;
+    document.querySelectorAll('#playlist li').forEach((el,i)=>el.classList.toggle('active', i===currentTrack));
+}
+
+function playTrack(){ audio.play(); isPlaying=true; playBtn.textContent='⏸'; }
+function pauseTrack(){ audio.pause(); isPlaying=false; playBtn.textContent='▶'; }
+function togglePlay(){ isPlaying?pauseTrack():playTrack(); }
+
+function nextTrack(){ currentTrack=(currentTrack+1)%tracks.length; loadTrack(); if(isPlaying) playTrack(); }
+function prevTrack(){ currentTrack=(currentTrack-1+tracks.length)%tracks.length; loadTrack(); if(isPlaying) playTrack(); }
+
+audio.addEventListener('timeupdate', ()=>{
+    if(isNaN(audio.duration)) return;
+    const percent = (audio.currentTime/audio.duration)*100;
+    progressBar.style.width = percent+'%';
+    timeEl.textContent = formatTime(audio.currentTime)+' / '+formatTime(audio.duration);
 });
+
+function setProgress(e){
+    const width = e.currentTarget.offsetWidth;
+    const clickX = e.offsetX;
+    audio.currentTime = (clickX/width)*audio.duration;
+}
+
+function formatTime(sec){
+    const m=Math.floor(sec/60);
+    const s=Math.floor(sec%60);
+    return `${m}:${s<10?'0':''}${s}`;
+}
+
+// --- Адмін панель ---
+function send(action){
+    fetch("/maintenance",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({action})
+    })
+    .then(res=>res.text())
+    .then(msg=>alert("Сервер: "+msg))
+    .catch(err=>alert("Помилка: "+err));
+}
+</script>
+
+</body>
+</html>
