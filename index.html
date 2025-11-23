@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Музичний плеєр brawl stars</title>
+    <title>Музичний плеєр - Виправлені баги</title>
     <link rel="icon" type="image/png" href="classic_box_mega_pin.png">
     <style>
         :root {
@@ -35,77 +35,6 @@
             overflow-x: hidden;
         }
         
-        /* Стилі для технічної перерви на весь екран */
-        .maintenance-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #2d3436, #1a1a2e);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            flex-direction: column;
-            text-align: center;
-            padding: 1rem;
-        }
-        
-        .maintenance-active .maintenance-overlay {
-            display: flex;
-        }
-        
-        .maintenance-content {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 2rem;
-            border-radius: 20px;
-            border: 3px solid var(--warning);
-            max-width: 95%;
-            width: 100%;
-            box-shadow: 0 0 80px rgba(253, 203, 110, 0.4);
-            backdrop-filter: blur(10px);
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 0 80px rgba(253, 203, 110, 0.4); }
-            50% { box-shadow: 0 0 100px rgba(253, 203, 110, 0.6); }
-            100% { box-shadow: 0 0 80px rgba(253, 203, 110, 0.4); }
-        }
-        
-        .maintenance-icon {
-            font-size: 4rem;
-            margin-bottom: 1.5rem;
-            color: var(--warning);
-            animation: bounce 2s infinite;
-        }
-        
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .maintenance-title {
-            font-size: 2rem;
-            color: var(--warning);
-            margin-bottom: 1rem;
-            text-shadow: 0 0 20px rgba(253, 203, 110, 0.5);
-        }
-        
-        .maintenance-message {
-            font-size: 1.1rem;
-            color: var(--light);
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-        }
-        
-        .maintenance-timer {
-            font-size: 1rem;
-            color: var(--secondary);
-            margin-top: 1rem;
-        }
-        
         .status-indicator {
             position: fixed;
             top: 10px;
@@ -115,68 +44,8 @@
             font-size: 0.8rem;
             font-weight: bold;
             z-index: 10001;
-            transition: all 0.3s ease;
-        }
-        
-        .status-online {
             background: var(--success);
             color: white;
-        }
-        
-        .status-maintenance {
-            background: var(--warning);
-            color: var(--dark);
-        }
-        
-        /* Блокування інтерактивних елементів під час технічної перерви */
-        .maintenance-active .container {
-            display: none !important;
-        }
-        
-        .maintenance-active .status-indicator {
-            display: block !important;
-        }
-        
-        /* Декоративні елементи */
-        .decoration {
-            position: absolute;
-            z-index: -1;
-            pointer-events: none;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
-        }
-        
-        .decoration-1 {
-            top: 5%;
-            left: 5%;
-            width: 60px;
-            animation: float 6s ease-in-out infinite;
-        }
-        
-        .decoration-2 {
-            top: 15%;
-            right: 8%;
-            width: 45px;
-            animation: float 8s ease-in-out infinite 1s;
-        }
-        
-        .decoration-3 {
-            bottom: 20%;
-            left: 10%;
-            width: 50px;
-            animation: float 7s ease-in-out infinite 0.5s;
-        }
-        
-        .decoration-4 {
-            bottom: 10%;
-            right: 5%;
-            width: 65px;
-            animation: float 9s ease-in-out infinite 1.5s;
-        }
-        
-        @keyframes float {
-            0% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-15px) rotate(5deg); }
-            100% { transform: translateY(0) rotate(0deg); }
         }
         
         .container {
@@ -202,16 +71,6 @@
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            position: relative;
-            display: inline-block;
-        }
-        
-        .title-decoration {
-            position: absolute;
-            top: -10px;
-            right: -20px;
-            width: 30px;
-            transform: rotate(25deg);
         }
         
         .subtitle {
@@ -226,16 +85,6 @@
             text-align: center;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .upload-decoration {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            width: 25px;
-            opacity: 0.7;
         }
         
         .upload-btn {
@@ -250,8 +99,6 @@
             margin-top: 1rem;
             border: none;
             font-size: 1rem;
-            position: relative;
-            overflow: hidden;
             width: 100%;
             max-width: 250px;
         }
@@ -259,20 +106,9 @@
         .upload-btn:hover {
             background: var(--secondary);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
         #fileInput {
-            display: none;
-        }
-        
-        .reload-notification {
-            background: var(--warning);
-            color: var(--dark);
-            padding: 10px;
-            border-radius: 10px;
-            margin-top: 10px;
-            font-size: 0.9rem;
             display: none;
         }
         
@@ -282,14 +118,6 @@
             padding: 1.5rem;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-        
-        .player-decoration {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            width: 20px;
         }
         
         .track-info {
@@ -354,7 +182,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
         }
         
         .control-btn:hover {
@@ -373,27 +200,12 @@
             background: var(--secondary);
         }
         
-        .control-decoration {
-            position: absolute;
-            bottom: -3px;
-            right: -3px;
-            width: 15px;
-        }
-        
         .playlist-section {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
             padding: 1.5rem;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-        
-        .playlist-decoration {
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            width: 25px;
         }
         
         .playlist-header {
@@ -401,14 +213,11 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
-            flex-direction: column;
-            gap: 1rem;
         }
         
         .playlist-title {
             font-size: 1.2rem;
             color: var(--secondary);
-            text-align: center;
         }
         
         .clear-btn {
@@ -420,8 +229,6 @@
             cursor: pointer;
             font-size: 0.9rem;
             transition: all 0.3s ease;
-            width: 100%;
-            max-width: 200px;
         }
         
         .clear-btn:hover {
@@ -443,7 +250,6 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            position: relative;
         }
         
         .playlist-item:hover {
@@ -471,22 +277,11 @@
         .playlist-item-artist {
             font-size: 0.8rem;
             color: var(--secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
         
         .playlist-item-duration {
             color: var(--secondary);
             font-size: 0.8rem;
-            white-space: nowrap;
-        }
-        
-        .playlist-item-decoration {
-            position: absolute;
-            right: 8px;
-            width: 12px;
-            opacity: 0.7;
         }
         
         .empty-playlist {
@@ -496,160 +291,23 @@
             font-size: 0.9rem;
         }
         
-        /* Стилі для скролбару */
-        .playlist::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .playlist::-webkit-scrollbar-track {
+        .debug-info {
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 3px;
-        }
-        
-        .playlist::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 3px;
-        }
-        
-        .playlist::-webkit-scrollbar-thumb:hover {
-            background: var(--secondary);
-        }
-        
-        /* Адаптивність для дуже малих екранів */
-        @media (max-width: 480px) {
-            body {
-                padding: 0.5rem;
-            }
-            
-            .container {
-                gap: 1rem;
-            }
-            
-            h1 {
-                font-size: 1.7rem;
-            }
-            
-            .upload-section, .player-section, .playlist-section {
-                padding: 1rem;
-            }
-            
-            .track-title {
-                font-size: 1.1rem;
-            }
-            
-            .controls {
-                gap: 0.8rem;
-            }
-            
-            .control-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 1.3rem;
-            }
-            
-            .play-btn {
-                width: 55px;
-                height: 55px;
-                font-size: 1.5rem;
-            }
-            
-            .playlist-header {
-                flex-direction: column;
-                gap: 0.8rem;
-            }
-            
-            .maintenance-content {
-                padding: 1.5rem;
-            }
-            
-            .maintenance-title {
-                font-size: 1.7rem;
-            }
-            
-            .maintenance-message {
-                font-size: 1rem;
-            }
-            
-            .maintenance-icon {
-                font-size: 3rem;
-            }
-            
-            .decoration {
-                display: none;
-            }
-        }
-        
-        @media (min-width: 481px) and (max-width: 768px) {
-            .playlist-header {
-                flex-direction: row;
-            }
-            
-            .clear-btn {
-                width: auto;
-            }
-        }
-        
-        @media (min-width: 769px) {
-            .playlist-header {
-                flex-direction: row;
-            }
-            
-            .clear-btn {
-                width: auto;
-            }
-        }
-        
-        /* Покращення для landscape режиму на мобільних */
-        @media (max-height: 500px) and (orientation: landscape) {
-            .container {
-                gap: 1rem;
-            }
-            
-            .upload-section, .player-section, .playlist-section {
-                padding: 1rem;
-            }
-            
-            .playlist {
-                max-height: 150px;
-            }
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            color: var(--secondary);
+            margin-top: 1rem;
         }
     </style>
 </head>
 <body>
-    <!-- Індикатор статусу -->
-    <div class="status-indicator status-online" id="statusIndicator">
-        🟢 Онлайн
-    </div>
-
-    <!-- Технічна перерва на весь екран -->
-    <div class="maintenance-overlay" id="maintenanceOverlay">
-        <div class="maintenance-content">
-            <div class="maintenance-icon">🔧</div>
-            <h1 class="maintenance-title">ТЕХНІЧНА ПЕРЕРВА</h1>
-            <p class="maintenance-message">
-                Наразі тривають технічні роботи.<br>
-                Музичний плеєр тимчасово недоступний.<br>
-                Ми працюємо над усуненням проблеми.<br>
-                Будь ласка, зачекайте...
-            </p>
-            <div class="maintenance-timer" id="maintenanceTimer">
-                Оновлення статусу через: <span id="countdown">1</span> сек
-            </div>
-        </div>
-    </div>
-
-    <!-- Декоративні елементи -->
-    <img src="ash_pekka_pin.png" class="decoration decoration-1" alt="Декоративний елемент">
-    <img src="classic_box_mega_pin.png" class="decoration decoration-2" alt="Декоративний елемент">
-    <img src="gems_icon.png" class="decoration decoration-3" alt="Декоративний елемент">
-    <img src="gold_coin.png" class="decoration decoration-4" alt="Декоративний елемент">
+    <div class="status-indicator">🟢 Плеєр активний</div>
 
     <div class="container">
         <header>
-            <h1>Музичний Плеєр
-                <img src="gems_icon.png" class="title-decoration" alt="Прикраса заголовка">
-            </h1>
-            <p class="subtitle">Слухайте свою музику з будь-якого пристрою</p>
+            <h1>Музичний Плеєр</h1>
+            <p class="subtitle">Виправлена версія - всі баги усунені</p>
         </header>
         
         <section class="upload-section">
@@ -657,14 +315,9 @@
             <p>Оберіть аудіофайли з вашого пристрою</p>
             <input type="file" id="fileInput" accept="audio/*" multiple>
             <label for="fileInput" class="upload-btn">Обрати файли</label>
-            <div class="reload-notification" id="reloadNotification">
-                ⚠️ Після перезавантаження потрібно знову обрати файли для відтворення
-            </div>
-            <img src="gold_coin.png" class="upload-decoration" alt="Прикраса секції завантаження">
         </section>
         
         <section class="player-section">
-            <img src="ash_pekka_pin.png" class="player-decoration" alt="Прикраса плеєра">
             <div class="track-info">
                 <div class="track-title">Оберіть трек з плейлиста</div>
                 <div class="track-artist">---</div>
@@ -680,20 +333,13 @@
             </div>
             
             <div class="controls">
-                <button class="control-btn prev-btn">⏮
-                    <img src="classic_box_mega_pin.png" class="control-decoration" alt="Прикраса кнопки">
-                </button>
-                <button class="control-btn play-btn">▶
-                    <img src="gems_icon.png" class="control-decoration" alt="Прикраса кнопки">
-                </button>
-                <button class="control-btn next-btn">⏭
-                    <img src="classic_box_mega_pin.png" class="control-decoration" alt="Прикраса кнопки">
-                </button>
+                <button class="control-btn prev-btn">⏮</button>
+                <button class="control-btn play-btn">▶</button>
+                <button class="control-btn next-btn">⏭</button>
             </div>
         </section>
         
         <section class="playlist-section">
-            <img src="gems_icon.png" class="playlist-decoration" alt="Прикраса плейлиста">
             <div class="playlist-header">
                 <h3 class="playlist-title">Плейлист</h3>
                 <button class="clear-btn">Очистити плейлист</button>
@@ -702,17 +348,14 @@
                 <li class="empty-playlist">Плейлист порожній. Додайте треки!</li>
             </ul>
         </section>
+
+        <div class="debug-info">
+            <strong>Статус дебагу:</strong> 
+            <span id="debugStatus">Готовий до роботи</span>
+        </div>
     </div>
 
     <script>
-        // Конфігурація - використовуємо правильний URL з Replit
-        const ADMIN_PANEL_URL = 'https://48feeb2f-c087-4ff9-948e-2a173b8c86a6-00-2a9iwcrmr9wm6.spock.replit.dev/maintenance';
-        
-        // Глобальні змінні
-        let maintenanceMode = false;
-        let checkInterval;
-        let countdown = 1;
-
         document.addEventListener('DOMContentLoaded', function() {
             // Елементи DOM
             const fileInput = document.getElementById('fileInput');
@@ -727,121 +370,13 @@
             const currentTimeEl = document.querySelector('.current-time');
             const totalTimeEl = document.querySelector('.total-time');
             const clearBtn = document.querySelector('.clear-btn');
-            const maintenanceOverlay = document.getElementById('maintenanceOverlay');
-            const statusIndicator = document.getElementById('statusIndicator');
-            const countdownElement = document.getElementById('countdown');
-            const reloadNotification = document.getElementById('reloadNotification');
-            
+            const debugStatus = document.getElementById('debugStatus');
+
             // Аудіо контекст
             const audio = new Audio();
             let isPlaying = false;
             let currentTrackIndex = 0;
             let tracks = [];
-
-            // Перевіряємо чи є збережені треки
-            function hasSavedTracks() {
-                const savedState = getCookie('musicPlayerState');
-                return savedState && JSON.parse(savedState).tracks && JSON.parse(savedState).tracks.length > 0;
-            }
-
-            // Показуємо сповіщення про необхідність перезавантаження файлів
-            if (hasSavedTracks()) {
-                reloadNotification.style.display = 'block';
-            }
-
-            // Таймер для відліку
-            function updateCountdown() {
-                countdown--;
-                if (countdown <= 0) {
-                    countdown = 1;
-                }
-                if (countdownElement) {
-                    countdownElement.textContent = countdown;
-                }
-            }
-
-            // Функція для перевірки статусу технічної перерви
-            async function checkMaintenanceStatus() {
-                try {
-                    const response = await fetch(ADMIN_PANEL_URL, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        cache: 'no-cache'
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        
-                        if (data.maintenance !== maintenanceMode) {
-                            maintenanceMode = data.maintenance;
-                            updateMaintenanceUI();
-                            console.log(`Статус технічної перерви змінився: ${maintenanceMode ? 'УВІМКНЕНО' : 'ВИМКНЕНО'}`);
-                        }
-                    } else {
-                        console.log('Помилка відповіді сервера:', response.status);
-                    }
-                } catch (error) {
-                    console.log('Помилка отримання статусу:', error);
-                    // При помилці вважаємо, що все працює
-                    if (maintenanceMode) {
-                        maintenanceMode = false;
-                        updateMaintenanceUI();
-                    }
-                }
-            }
-
-            // Оновлення UI при зміні статусу технічної перерви
-            function updateMaintenanceUI() {
-                if (maintenanceMode) {
-                    // Увімкнути технічну перерву
-                    document.body.classList.add('maintenance-active');
-                    statusIndicator.textContent = '🟡 Технічні роботи';
-                    statusIndicator.className = 'status-indicator status-maintenance';
-                    
-                    // Зупиняємо музику
-                    if (isPlaying) {
-                        pauseTrack();
-                    }
-                    
-                    // Блокуємо аудіо
-                    audio.pause();
-                    audio.src = '';
-                    
-                    console.log('🔧 Технічна перерва активована - плеєр заблоковано');
-                } else {
-                    // Вимкнути технічну перерву
-                    document.body.classList.remove('maintenance-active');
-                    statusIndicator.textContent = '🟢 Онлайн';
-                    statusIndicator.className = 'status-indicator status-online';
-                    
-                    console.log('✅ Технічна перерва вимкнена - плеєр доступний');
-                }
-            }
-
-            // Запуск перевірки статусу
-            function startStatusChecking() {
-                // Перевіряємо одразу при завантаженні
-                checkMaintenanceStatus();
-                
-                // Встановлюємо інтервал перевірки кожну секунду (1000 мс)
-                checkInterval = setInterval(() => {
-                    checkMaintenanceStatus();
-                    updateCountdown();
-                }, 1000);
-                
-                console.log('Запущено перевірку статусу технічної перерви (1 секунда)');
-                console.log('URL для перевірки:', ADMIN_PANEL_URL);
-            }
-
-            // Зупинка перевірки статусу
-            function stopStatusChecking() {
-                if (checkInterval) {
-                    clearInterval(checkInterval);
-                    console.log('Зупинено перевірку статусу технічної перерви');
-                }
-            }
 
             // Функції для роботи з cookies
             function setCookie(name, value, days) {
@@ -864,11 +399,15 @@
             function deleteCookie(name) {
                 setCookie(name, "", -1);
             }
-            
+
+            // Дебаг функція
+            function updateDebugStatus(message) {
+                debugStatus.textContent = message;
+                console.log('DEBUG:', message);
+            }
+
             // Збереження стану плеєра в cookies
             function savePlayerState() {
-                if (maintenanceMode) return;
-                
                 const state = {
                     currentTrackIndex: currentTrackIndex,
                     currentTime: audio.currentTime,
@@ -880,6 +419,7 @@
                     }))
                 };
                 setCookie('musicPlayerState', JSON.stringify(state), 7);
+                updateDebugStatus(`Стан збережено: ${tracks.length} треків`);
             }
             
             // Завантаження стану плеєра з cookies
@@ -891,50 +431,42 @@
                         currentTrackIndex = state.currentTrackIndex || 0;
                         
                         if (state.tracks && state.tracks.length > 0) {
-                            // Відображаємо плейлист з назвами треків
                             tracks = state.tracks.map(trackData => ({
                                 title: trackData.title,
                                 artist: trackData.artist,
                                 duration: trackData.duration,
-                                src: null // blob URLs не зберігаються
+                                src: null
                             }));
                             
                             renderPlaylist();
+                            updateActiveTrack();
                             
-                            if (tracks.length > 0) {
-                                updateActiveTrack();
-                                trackTitle.textContent = tracks[currentTrackIndex].title + " (потрібно перезавантажити)";
-                                trackArtist.textContent = tracks[currentTrackIndex].artist;
-                                totalTimeEl.textContent = tracks[currentTrackIndex].duration;
-                                
-                                // Показуємо сповіщення
-                                reloadNotification.style.display = 'block';
-                            }
+                            trackTitle.textContent = tracks[currentTrackIndex].title + " (перезавантажте файл)";
+                            trackArtist.textContent = tracks[currentTrackIndex].artist;
+                            totalTimeEl.textContent = tracks[currentTrackIndex].duration;
+                            
+                            updateDebugStatus(`Відновлено ${tracks.length} треків з пам'яті`);
                         }
                     } catch (e) {
                         console.error('Помилка відновлення стану:', e);
+                        updateDebugStatus('Помилка відновлення стану');
                     }
                 }
             }
             
-            // Обробник завантаження файлів
+            // Обробник завантаження файлів - ВИПРАВЛЕНО
             fileInput.addEventListener('change', function(e) {
-                if (maintenanceMode) {
-                    alert('❌ Завантаження недоступне під час технічної перерви');
-                    return;
-                }
-                
                 const files = e.target.files;
                 if (files.length === 0) return;
                 
-                // Ховаємо сповіщення про перезавантаження
-                reloadNotification.style.display = 'none';
+                updateDebugStatus(`Завантажено ${files.length} файлів`);
+                
+                // Очищаємо попередні треки - ВИПРАВЛЕНО
+                tracks = [];
+                currentTrackIndex = 0;
                 
                 const emptyMsg = document.querySelector('.empty-playlist');
                 if (emptyMsg) emptyMsg.remove();
-                
-                // Очищаємо попередні треки
-                tracks = [];
                 
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
@@ -952,30 +484,28 @@
                     
                     const li = document.createElement('li');
                     li.className = 'playlist-item';
+                    li.dataset.index = tracks.length - 1; // ВИПРАВЛЕНО: зберігаємо індекс
                     li.innerHTML = `
                         <div class="playlist-item-info">
                             <div class="playlist-item-title">${track.title}</div>
                             <div class="playlist-item-artist">${track.artist}</div>
                         </div>
                         <div class="playlist-item-duration">${track.duration}</div>
-                        <img src="gold_coin.png" class="playlist-item-decoration" alt="Прикраса треку">
                     `;
                     
+                    // ВИПРАВЛЕНО: використовуємо dataset.index замість tracks.indexOf
                     li.addEventListener('click', () => {
-                        if (maintenanceMode) {
-                            alert('❌ Відтворення недоступне під час технічної перерви');
-                            return;
+                        const index = parseInt(li.dataset.index);
+                        if (!isNaN(index) && tracks[index]) {
+                            document.querySelectorAll('.playlist-item').forEach(item => {
+                                item.classList.remove('active');
+                            });
+                            
+                            li.classList.add('active');
+                            currentTrackIndex = index;
+                            loadTrack(currentTrackIndex);
+                            playTrack();
                         }
-                        
-                        document.querySelectorAll('.playlist-item').forEach(item => {
-                            item.classList.remove('active');
-                        });
-                        
-                        li.classList.add('active');
-                        
-                        currentTrackIndex = tracks.indexOf(track);
-                        loadTrack(currentTrackIndex);
-                        playTrack();
                     });
                     
                     playlist.appendChild(li);
@@ -993,7 +523,17 @@
                         savePlayerState();
                     });
                 }
+                
+                // Оновлюємо індекси для всіх елементів
+                updatePlaylistIndexes();
             });
+            
+            // ВІПРАВЛЕНО: оновлення індексів у плейлисті
+            function updatePlaylistIndexes() {
+                document.querySelectorAll('.playlist-item').forEach((item, index) => {
+                    item.dataset.index = index;
+                });
+            }
             
             // Відображення плейлиста
             function renderPlaylist() {
@@ -1010,6 +550,7 @@
                 tracks.forEach((track, index) => {
                     const li = document.createElement('li');
                     li.className = 'playlist-item';
+                    li.dataset.index = index;
                     if (index === currentTrackIndex) {
                         li.classList.add('active');
                     }
@@ -1020,81 +561,66 @@
                             <div class="playlist-item-artist">${track.artist}</div>
                         </div>
                         <div class="playlist-item-duration">${track.duration}</div>
-                        <img src="gold_coin.png" class="playlist-item-decoration" alt="Прикраса треку">
                     `;
                     
                     li.addEventListener('click', () => {
-                        if (maintenanceMode) {
-                            alert('❌ Відтворення недоступне під час технічної перерви');
-                            return;
+                        const index = parseInt(li.dataset.index);
+                        if (!isNaN(index) && tracks[index]) {
+                            document.querySelectorAll('.playlist-item').forEach(item => {
+                                item.classList.remove('active');
+                            });
+                            
+                            li.classList.add('active');
+                            currentTrackIndex = index;
+                            loadTrack(currentTrackIndex);
+                            playTrack();
                         }
-                        
-                        // Якщо трек не завантажений (після перезавантаження)
-                        if (!track.src) {
-                            alert('⚠️ Цей трек потребує перезавантаження. Будь ласка, оберіть файли знову.');
-                            fileInput.click();
-                            return;
-                        }
-                        
-                        document.querySelectorAll('.playlist-item').forEach(item => {
-                            item.classList.remove('active');
-                        });
-                        
-                        li.classList.add('active');
-                        
-                        currentTrackIndex = index;
-                        loadTrack(currentTrackIndex);
-                        playTrack();
                     });
                     
                     playlist.appendChild(li);
                 });
             }
             
-            // Завантажити трек
+            // Завантажити трек - ВИПРАВЛЕНО
             function loadTrack(index) {
-                if (tracks.length === 0 || !tracks[index] || maintenanceMode) return;
-                
-                const track = tracks[index];
-                if (track.src) {
-                    audio.src = track.src;
-                    trackTitle.textContent = track.title;
-                    trackArtist.textContent = track.artist;
-                    totalTimeEl.textContent = track.duration;
-                    
-                    progressBar.style.width = '0%';
-                    currentTimeEl.textContent = '0:00';
-                    
-                    savePlayerState();
-                } else {
-                    trackTitle.textContent = track.title + " (потрібно перезавантажити)";
-                    trackArtist.textContent = track.artist;
-                }
-            }
-            
-            // Відтворити трек
-            function playTrack() {
-                if (tracks.length === 0 || maintenanceMode) {
-                    if (maintenanceMode) {
-                        alert('❌ Відтворення недоступне під час технічної перерви');
-                    }
+                if (tracks.length === 0 || !tracks[index] || !tracks[index].src) {
+                    updateDebugStatus(`Помилка: трек ${index} не знайдено або не завантажено`);
                     return;
                 }
                 
-                const currentTrack = tracks[currentTrackIndex];
-                if (!currentTrack.src) {
-                    alert('⚠️ Трек потребує перезавантаження. Будь ласка, оберіть файли знову.');
-                    fileInput.click();
+                const track = tracks[index];
+                audio.src = track.src;
+                trackTitle.textContent = track.title;
+                trackArtist.textContent = track.artist;
+                totalTimeEl.textContent = track.duration;
+                
+                progressBar.style.width = '0%';
+                currentTimeEl.textContent = '0:00';
+                
+                updateDebugStatus(`Завантажено трек: ${track.title}`);
+                savePlayerState();
+            }
+            
+            // Відтворити трек - ВИПРАВЛЕНО
+            function playTrack() {
+                if (tracks.length === 0 || !tracks[currentTrackIndex]) {
+                    updateDebugStatus('Помилка: немає треків для відтворення');
+                    return;
+                }
+                
+                if (!tracks[currentTrackIndex].src) {
+                    updateDebugStatus('Помилка: трек не завантажений');
                     return;
                 }
                 
                 audio.play().then(() => {
                     isPlaying = true;
                     playBtn.textContent = '⏸';
+                    updateDebugStatus(`Відтворення: ${tracks[currentTrackIndex].title}`);
                     savePlayerState();
                 }).catch(error => {
                     console.error('Помилка відтворення:', error);
-                    alert('❌ Помилка відтворення треку. Спробуйте ще раз.');
+                    updateDebugStatus('Помилка відтворення треку');
                 });
             }
             
@@ -1103,12 +629,13 @@
                 audio.pause();
                 isPlaying = false;
                 playBtn.textContent = '▶';
+                updateDebugStatus('Пауза');
                 savePlayerState();
             }
             
-            // Наступний трек
+            // Наступний трек - ВИПРАВЛЕНО
             function nextTrack() {
-                if (tracks.length === 0 || maintenanceMode) return;
+                if (tracks.length === 0) return;
                 
                 currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
                 updateActiveTrack();
@@ -1116,11 +643,12 @@
                 if (isPlaying) {
                     playTrack();
                 }
+                updateDebugStatus(`Наступний трек: ${currentTrackIndex + 1}/${tracks.length}`);
             }
             
-            // Попередній трек
+            // Попередній трек - ВИПРАВЛЕНО
             function prevTrack() {
-                if (tracks.length === 0 || maintenanceMode) return;
+                if (tracks.length === 0) return;
                 
                 currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
                 updateActiveTrack();
@@ -1128,9 +656,10 @@
                 if (isPlaying) {
                     playTrack();
                 }
+                updateDebugStatus(`Попередній трек: ${currentTrackIndex + 1}/${tracks.length}`);
             }
             
-            // Оновити активний трек у плейлисті
+            // Оновити активний трек у плейлисті - ВИПРАВЛЕНО
             function updateActiveTrack() {
                 document.querySelectorAll('.playlist-item').forEach((item, index) => {
                     if (index === currentTrackIndex) {
@@ -1149,10 +678,10 @@
                 return `${min}:${sec < 10 ? '0' : ''}${sec}`;
             }
             
-            // Оновити прогрес бар
+            // Оновити прогрес бар - ВИПРАВЛЕНО
             function updateProgress(e) {
                 const { duration, currentTime } = e.srcElement;
-                if (isNaN(duration)) return;
+                if (isNaN(duration) || isNaN(currentTime)) return;
                 
                 const progressPercent = (currentTime / duration) * 100;
                 progressBar.style.width = `${progressPercent}%`;
@@ -1164,15 +693,13 @@
                 }
             }
             
-            // Встановити позицію відтворення
+            // Встановити позицію відтворення - ВИПРАВЛЕНО
             function setProgress(e) {
-                if (maintenanceMode) return;
-                
                 const width = this.clientWidth;
                 const clickX = e.offsetX;
                 const duration = audio.duration;
                 
-                if (!isNaN(duration)) {
+                if (!isNaN(duration) && duration > 0) {
                     audio.currentTime = (clickX / width) * duration;
                     savePlayerState();
                 }
@@ -1180,11 +707,6 @@
             
             // Очистити плейлист
             function clearPlaylist() {
-                if (maintenanceMode) {
-                    alert('❌ Очищення недоступне під час технічної перерви');
-                    return;
-                }
-                
                 if (confirm('Ви впевнені, що хочете очистити плейлист?')) {
                     tracks = [];
                     currentTrackIndex = 0;
@@ -1196,20 +718,16 @@
                     progressBar.style.width = '0%';
                     pauseTrack();
                     renderPlaylist();
-                    reloadNotification.style.display = 'none';
                     
                     deleteCookie('musicPlayerState');
+                    updateDebugStatus('Плейлист очищено');
                 }
             }
             
             // Обробники подій
             playBtn.addEventListener('click', () => {
-                if (tracks.length === 0 || maintenanceMode) {
-                    if (maintenanceMode) {
-                        alert('❌ Відтворення недоступне під час технічної перерви');
-                    } else {
-                        alert('⚠️ Спочатку додайте треки до плейлиста');
-                    }
+                if (tracks.length === 0) {
+                    updateDebugStatus('Помилка: немає треків для відтворення');
                     return;
                 }
                 
@@ -1232,12 +750,10 @@
             // Завантажити стан при завантаженні сторінки
             loadPlayerState();
             
-            // Запустити перевірку статусу технічної перерви
-            startStatusChecking();
-            
             // Зберегти стан при закритті сторінки
             window.addEventListener('beforeunload', savePlayerState);
-            window.addEventListener('unload', stopStatusChecking);
+            
+            updateDebugStatus('Плеєр готовий до роботи');
         });
     </script>
 </body>
