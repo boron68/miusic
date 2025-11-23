@@ -35,6 +35,77 @@
             overflow-x: hidden;
         }
         
+        /* Стилі для технічної перерви на весь екран */
+        .maintenance-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2d3436, #1a1a2e);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            flex-direction: column;
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .maintenance-active .maintenance-overlay {
+            display: flex;
+        }
+        
+        .maintenance-content {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 3px solid var(--warning);
+            max-width: 95%;
+            width: 100%;
+            box-shadow: 0 0 80px rgba(253, 203, 110, 0.4);
+            backdrop-filter: blur(10px);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 80px rgba(253, 203, 110, 0.4); }
+            50% { box-shadow: 0 0 100px rgba(253, 203, 110, 0.6); }
+            100% { box-shadow: 0 0 80px rgba(253, 203, 110, 0.4); }
+        }
+        
+        .maintenance-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            color: var(--warning);
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .maintenance-title {
+            font-size: 2rem;
+            color: var(--warning);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px rgba(253, 203, 110, 0.5);
+        }
+        
+        .maintenance-message {
+            font-size: 1.1rem;
+            color: var(--light);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        
+        .maintenance-timer {
+            font-size: 1rem;
+            color: var(--secondary);
+            margin-top: 1rem;
+        }
+        
         .status-indicator {
             position: fixed;
             top: 10px;
@@ -44,8 +115,26 @@
             font-size: 0.8rem;
             font-weight: bold;
             z-index: 10001;
+            transition: all 0.3s ease;
+        }
+        
+        .status-online {
             background: var(--success);
             color: white;
+        }
+        
+        .status-maintenance {
+            background: var(--warning);
+            color: var(--dark);
+        }
+        
+        /* Блокування інтерактивних елементів під час технічної перерви */
+        .maintenance-active .container {
+            display: none !important;
+        }
+        
+        .maintenance-active .status-indicator {
+            display: block !important;
         }
         
         .container {
@@ -302,7 +391,27 @@
     </style>
 </head>
 <body>
-    <div class="status-indicator">🟢 Плеєр активний</div>
+    <!-- Індикатор статусу -->
+    <div class="status-indicator status-online" id="statusIndicator">
+        🟢 Онлайн
+    </div>
+
+    <!-- Технічна перерва на весь екран -->
+    <div class="maintenance-overlay" id="maintenanceOverlay">
+        <div class="maintenance-content">
+            <div class="maintenance-icon">🔧</div>
+            <h1 class="maintenance-title">ТЕХНІЧНА ПЕРЕРВА</h1>
+            <p class="maintenance-message">
+                Наразі тривають технічні роботи.<br>
+                Музичний плеєр тимчасово недоступний.<br>
+                Ми працюємо над усуненням проблеми.<br>
+                Будь ласка, зачекайте...
+            </p>
+            <div class="maintenance-timer" id="maintenanceTimer">
+                Оновлення статусу через: <span id="countdown">1</span> сек
+            </div>
+        </div>
+    </div>
 
     <div class="container">
         <header>
@@ -356,6 +465,14 @@
     </div>
 
     <script>
+        // Конфігурація - використовуємо правильний URL з Replit
+        const ADMIN_PANEL_URL = 'https://48feeb2f-c087-4ff9-948e-2a173b8c86a6-00-2a9iwcrmr9wm6.spock.replit.dev/maintenance';
+        
+        // Глобальні змінні
+        let maintenanceMode = false;
+        let checkInterval;
+        let countdown = 1;
+
         document.addEventListener('DOMContentLoaded', function() {
             // Елементи DOM
             const fileInput = document.getElementById('fileInput');
@@ -370,6 +487,9 @@
             const currentTimeEl = document.querySelector('.current-time');
             const totalTimeEl = document.querySelector('.total-time');
             const clearBtn = document.querySelector('.clear-btn');
+            const maintenanceOverlay = document.getElementById('maintenanceOverlay');
+            const statusIndicator = document.getElementById('statusIndicator');
+            const countdownElement = document.getElementById('countdown');
             const debugStatus = document.getElementById('debugStatus');
 
             // Аудіо контекст
@@ -377,6 +497,105 @@
             let isPlaying = false;
             let currentTrackIndex = 0;
             let tracks = [];
+
+            // Таймер для відліку
+            function updateCountdown() {
+                countdown--;
+                if (countdown <= 0) {
+                    countdown = 1;
+                }
+                if (countdownElement) {
+                    countdownElement.textContent = countdown;
+                }
+            }
+
+            // Функція для перевірки статусу технічної перерви
+            async function checkMaintenanceStatus() {
+                try {
+                    const response = await fetch(ADMIN_PANEL_URL, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        cache: 'no-cache'
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (data.maintenance !== maintenanceMode) {
+                            maintenanceMode = data.maintenance;
+                            updateMaintenanceUI();
+                            updateDebugStatus(`Статус технічної перерви: ${maintenanceMode ? 'УВІМКНЕНО' : 'ВИМКНЕНО'}`);
+                        }
+                    } else {
+                        console.log('Помилка відповіді сервера:', response.status);
+                    }
+                } catch (error) {
+                    console.log('Помилка отримання статусу:', error);
+                    // При помилці вважаємо, що все працює
+                    if (maintenanceMode) {
+                        maintenanceMode = false;
+                        updateMaintenanceUI();
+                    }
+                }
+            }
+
+            // Оновлення UI при зміні статусу технічної перерви
+            function updateMaintenanceUI() {
+                if (maintenanceMode) {
+                    // Увімкнути технічну перерву
+                    document.body.classList.add('maintenance-active');
+                    statusIndicator.textContent = '🟡 Технічні роботи';
+                    statusIndicator.className = 'status-indicator status-maintenance';
+                    
+                    // Зупиняємо музику
+                    if (isPlaying) {
+                        pauseTrack();
+                    }
+                    
+                    // Блокуємо аудіо
+                    audio.pause();
+                    audio.src = '';
+                    
+                    updateDebugStatus('🔧 Технічна перерва активована - плеєр заблоковано');
+                } else {
+                    // Вимкнути технічну перерву
+                    document.body.classList.remove('maintenance-active');
+                    statusIndicator.textContent = '🟢 Онлайн';
+                    statusIndicator.className = 'status-indicator status-online';
+                    
+                    updateDebugStatus('✅ Технічна перерва вимкнена - плеєр доступний');
+                }
+            }
+
+            // Запуск перевірки статусу
+            function startStatusChecking() {
+                // Перевіряємо одразу при завантаженні
+                checkMaintenanceStatus();
+                
+                // Встановлюємо інтервал перевірки кожну секунду (1000 мс)
+                checkInterval = setInterval(() => {
+                    checkMaintenanceStatus();
+                    updateCountdown();
+                }, 1000);
+                
+                updateDebugStatus('Запущено перевірку статусу технічної перерви (1 секунда)');
+            }
+
+            // Зупинка перевірки статусу
+            function stopStatusChecking() {
+                if (checkInterval) {
+                    clearInterval(checkInterval);
+                    updateDebugStatus('Зупинено перевірку статусу технічної перерви');
+                }
+            }
+
+            // Дебаг функція
+            function updateDebugStatus(message) {
+                debugStatus.textContent = message;
+                console.log('DEBUG:', message);
+            }
 
             // Функції для роботи з cookies
             function setCookie(name, value, days) {
@@ -400,14 +619,10 @@
                 setCookie(name, "", -1);
             }
 
-            // Дебаг функція
-            function updateDebugStatus(message) {
-                debugStatus.textContent = message;
-                console.log('DEBUG:', message);
-            }
-
             // Збереження стану плеєра в cookies
             function savePlayerState() {
+                if (maintenanceMode) return;
+                
                 const state = {
                     currentTrackIndex: currentTrackIndex,
                     currentTime: audio.currentTime,
@@ -456,6 +671,11 @@
             
             // Обробник завантаження файлів - ВИПРАВЛЕНО
             fileInput.addEventListener('change', function(e) {
+                if (maintenanceMode) {
+                    alert('❌ Завантаження недоступне під час технічної перерви');
+                    return;
+                }
+                
                 const files = e.target.files;
                 if (files.length === 0) return;
                 
@@ -495,6 +715,11 @@
                     
                     // ВИПРАВЛЕНО: використовуємо dataset.index замість tracks.indexOf
                     li.addEventListener('click', () => {
+                        if (maintenanceMode) {
+                            alert('❌ Відтворення недоступне під час технічної перерви');
+                            return;
+                        }
+
                         const index = parseInt(li.dataset.index);
                         if (!isNaN(index) && tracks[index]) {
                             document.querySelectorAll('.playlist-item').forEach(item => {
@@ -564,6 +789,11 @@
                     `;
                     
                     li.addEventListener('click', () => {
+                        if (maintenanceMode) {
+                            alert('❌ Відтворення недоступне під час технічної перерви');
+                            return;
+                        }
+
                         const index = parseInt(li.dataset.index);
                         if (!isNaN(index) && tracks[index]) {
                             document.querySelectorAll('.playlist-item').forEach(item => {
@@ -603,6 +833,11 @@
             
             // Відтворити трек - ВИПРАВЛЕНО
             function playTrack() {
+                if (maintenanceMode) {
+                    alert('❌ Відтворення недоступне під час технічної перерви');
+                    return;
+                }
+
                 if (tracks.length === 0 || !tracks[currentTrackIndex]) {
                     updateDebugStatus('Помилка: немає треків для відтворення');
                     return;
@@ -635,6 +870,7 @@
             
             // Наступний трек - ВИПРАВЛЕНО
             function nextTrack() {
+                if (maintenanceMode) return;
                 if (tracks.length === 0) return;
                 
                 currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
@@ -648,6 +884,7 @@
             
             // Попередній трек - ВИПРАВЛЕНО
             function prevTrack() {
+                if (maintenanceMode) return;
                 if (tracks.length === 0) return;
                 
                 currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
@@ -695,6 +932,8 @@
             
             // Встановити позицію відтворення - ВИПРАВЛЕНО
             function setProgress(e) {
+                if (maintenanceMode) return;
+                
                 const width = this.clientWidth;
                 const clickX = e.offsetX;
                 const duration = audio.duration;
@@ -707,6 +946,11 @@
             
             // Очистити плейлист
             function clearPlaylist() {
+                if (maintenanceMode) {
+                    alert('❌ Очищення недоступне під час технічної перерви');
+                    return;
+                }
+
                 if (confirm('Ви впевнені, що хочете очистити плейлист?')) {
                     tracks = [];
                     currentTrackIndex = 0;
@@ -726,6 +970,11 @@
             
             // Обробники подій
             playBtn.addEventListener('click', () => {
+                if (maintenanceMode) {
+                    alert('❌ Відтворення недоступне під час технічної перерви');
+                    return;
+                }
+
                 if (tracks.length === 0) {
                     updateDebugStatus('Помилка: немає треків для відтворення');
                     return;
@@ -750,8 +999,12 @@
             // Завантажити стан при завантаженні сторінки
             loadPlayerState();
             
+            // Запустити перевірку статусу технічної перерви
+            startStatusChecking();
+            
             // Зберегти стан при закритті сторінки
             window.addEventListener('beforeunload', savePlayerState);
+            window.addEventListener('unload', stopStatusChecking);
             
             updateDebugStatus('Плеєр готовий до роботи');
         });
